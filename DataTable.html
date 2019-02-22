@@ -39,11 +39,6 @@
     <script type="text/javascript" src="Scripts/datatables/Select-1.2.6/js/dataTables.select.js"></script>
     <script>
         function dynamicAjaxBind() {
-            var id = "#example";
-            if ($.fn.DataTable.isDataTable(id)) {
-                $(id).DataTable().clear().destroy();
-                $(id).html('');
-            }
             var sql = document.getElementById("ta").value;
             $.ajax({
                 type: 'post',
@@ -51,9 +46,7 @@
                 url: 'http://localhost:5000/api/StoreProcedureExecutor/usp_executesql',
                 data: {sql:sql},
                 success: function(d) {
-                    $(id).DataTable({
-                        //destroy: true,
-                        //searching: false,
+                    $('#example').DataTable({
                         dom: "Bfrtip",
                         data: d.Outputs.ResultSets[0].Rows,
                         columns: d.Outputs.ResultSets[0].Columns

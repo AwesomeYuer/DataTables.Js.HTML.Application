@@ -38,38 +38,54 @@
     <script type="text/javascript" src="Scripts/datatables/Scroller-1.5.0/js/dataTables.scroller.js"></script>
     <script type="text/javascript" src="Scripts/datatables/Select-1.2.6/js/dataTables.select.js"></script>
     <script>
-        function dynamicAjaxBind() {
-            var id = "#example";
-            if ($.fn.DataTable.isDataTable(id)) {
-                $(id).DataTable().clear().destroy();
-                $(id).html('');
-            }
-            var sql = document.getElementById("ta").value;
-            $.ajax({
-                type: 'post',
 
-                url: 'http://localhost:5000/api/StoreProcedureExecutor/usp_executesql',
-                data: {sql:sql},
-                success: function(d) {
-                    $(id).DataTable({
-                        //destroy: true,
-                        //searching: false,
-                        dom: "Bfrtip",
-                        data: d.Outputs.ResultSets[0].Rows,
-                        columns: d.Outputs.ResultSets[0].Columns
-                    });
+        $(document).ready(function () {
+           var table1 = $('#example').DataTable({
+                "processing": true,
+                "lengthChange": true,
+                "serverSide": true,
+                "pagingType": "full_numbers",
+                ajax: {
+                        url: "http://localhost:5816/api/StoreProcedureExecutor/zsp_GetDatesAfter",
+                        data: function(d) {
+                            //debugger;
+                            var pageInfo = $('#example').DataTable().page.info(); 
+                            var dd = {
+                                begindate : "2018-01-01" ,
+                                pagesize : pageInfo.length,
+                                PageNumber : Math.floor(pageInfo.start/pageInfo.length)+1
+                            };
+                            return dd;
+                        },
+                        dataFilter: function(response){
+                            //debugger;
+                            var temp = JSON.parse(response);
+                            var parameters = temp.Outputs.Parameters;
+                            var result = {
+                                "recordsTotal": parameters.TotalRows,
+                                "recordsFiltered": parameters.TotalRows,
+                                "data": temp.Outputs.ResultSets[0]
+                            };
+                            return JSON.stringify(result);
+                        },
+                        dataSrc : function(response){
+                            
+                            return response.data;
+                        }
                 },
-                //contentType: "application/json",
-                //dataType: 'json',
+                "columns": [
+                    { "data": "乘车日期" },
+                    // { "data": "hr.position" },
+                    // { "data": "contact.0" },
+                    // { "data": "contact.1" },
+                    // { "data": "hr.start_date" },
+                    // { "data": "hr.salary" }
+                ]
             });
+            //debugger;
+            var info = table1.page.info();
 
-            
-        }
-
-
-
-
-        
+        });
         //debugger;
     </script>
 
@@ -88,9 +104,6 @@
             </tr>
         </thead> -->
     </table>
-    <button onclick="dynamicAjaxBind()">dynamicAjaxBind</button>
-    <textarea id="ta" rows="10" cols="100"></textarea>
-
 </body>
 
 </html>
